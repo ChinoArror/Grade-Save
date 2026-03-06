@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { fetchWithAuth } from '@/src/lib/fetchWithAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/components/ui/card';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
@@ -56,9 +57,9 @@ export default function Dashboard() {
     setLoading(true);
     try {
       const [subsRes, catsRes, recsRes] = await Promise.all([
-        fetch('/api/subjects'),
-        fetch('/api/categories'),
-        fetch('/api/records'),
+        fetchWithAuth('/api/subjects'),
+        fetchWithAuth('/api/categories'),
+        fetchWithAuth('/api/records'),
       ]);
       setSubjects(await subsRes.json());
       setCategories(await catsRes.json());
@@ -77,9 +78,8 @@ export default function Dashboard() {
   const handleAddSubject = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newSubjectName) return;
-    await fetch('/api/subjects', {
+    await fetchWithAuth('/api/subjects', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: newSubjectName }),
     });
     setNewSubjectName('');
@@ -89,9 +89,8 @@ export default function Dashboard() {
   const handleAddCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCategoryName || !newCategorySubjectId) return;
-    await fetch('/api/categories', {
+    await fetchWithAuth('/api/categories', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: newCategoryName, subjectId: newCategorySubjectId }),
     });
     setNewCategoryName('');
@@ -100,9 +99,8 @@ export default function Dashboard() {
 
   const handleAddRecord = async (e: React.FormEvent) => {
     e.preventDefault();
-    await fetch('/api/records', {
+    await fetchWithAuth('/api/records', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData),
     });
     setShowAddRecord(false);
@@ -111,7 +109,7 @@ export default function Dashboard() {
 
   const handleDeleteRecord = async (id: number) => {
     if (!confirm('Are you sure you want to delete this record?')) return;
-    await fetch(`/api/records/${id}`, { method: 'DELETE' });
+    await fetchWithAuth(`/api/records/${id}`, { method: 'DELETE' });
     fetchData();
   };
 
@@ -160,19 +158,19 @@ export default function Dashboard() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Date</Label>
-                  <Input 
-                    type="date" 
+                  <Input
+                    type="date"
                     value={formData.date}
-                    onChange={e => setFormData({...formData, date: e.target.value})}
+                    onChange={e => setFormData({ ...formData, date: e.target.value })}
                     required
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>Subject</Label>
-                  <select 
+                  <select
                     className="flex h-10 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:border-zinc-800 dark:bg-zinc-950 dark:focus-visible:ring-zinc-300"
                     value={formData.subjectId}
-                    onChange={e => setFormData({...formData, subjectId: e.target.value, categoryId: ''})}
+                    onChange={e => setFormData({ ...formData, subjectId: e.target.value, categoryId: '' })}
                     required
                   >
                     <option value="">Select Subject</option>
@@ -181,10 +179,10 @@ export default function Dashboard() {
                 </div>
                 <div className="space-y-2">
                   <Label>Category</Label>
-                  <select 
+                  <select
                     className="flex h-10 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:border-zinc-800 dark:bg-zinc-950 dark:focus-visible:ring-zinc-300"
                     value={formData.categoryId}
-                    onChange={e => setFormData({...formData, categoryId: e.target.value})}
+                    onChange={e => setFormData({ ...formData, categoryId: e.target.value })}
                     required
                     disabled={!formData.subjectId}
                   >
@@ -196,11 +194,11 @@ export default function Dashboard() {
                 </div>
                 <div className="space-y-2 flex flex-col justify-center">
                   <Label className="flex items-center gap-2 cursor-pointer">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       className="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-950 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50 dark:focus:ring-zinc-300"
                       checked={formData.isAssignedGrading}
-                      onChange={e => setFormData({...formData, isAssignedGrading: e.target.checked})}
+                      onChange={e => setFormData({ ...formData, isAssignedGrading: e.target.checked })}
                     />
                     Assigned Grading (赋分制)
                   </Label>
@@ -209,10 +207,10 @@ export default function Dashboard() {
                 {!formData.isAssignedGrading ? (
                   <div className="space-y-2">
                     <Label>Score</Label>
-                    <Input 
-                      type="number" step="0.1" 
+                    <Input
+                      type="number" step="0.1"
                       value={formData.score}
-                      onChange={e => setFormData({...formData, score: e.target.value})}
+                      onChange={e => setFormData({ ...formData, score: e.target.value })}
                       required
                     />
                   </div>
@@ -220,19 +218,19 @@ export default function Dashboard() {
                   <>
                     <div className="space-y-2">
                       <Label>Raw Score (卷面分)</Label>
-                      <Input 
-                        type="number" step="0.1" 
+                      <Input
+                        type="number" step="0.1"
                         value={formData.rawScore}
-                        onChange={e => setFormData({...formData, rawScore: e.target.value})}
+                        onChange={e => setFormData({ ...formData, rawScore: e.target.value })}
                         required
                       />
                     </div>
                     <div className="space-y-2">
                       <Label>Assigned Score (赋分)</Label>
-                      <Input 
-                        type="number" step="0.1" 
+                      <Input
+                        type="number" step="0.1"
                         value={formData.assignedScore}
-                        onChange={e => setFormData({...formData, assignedScore: e.target.value})}
+                        onChange={e => setFormData({ ...formData, assignedScore: e.target.value })}
                         required
                       />
                     </div>
@@ -241,94 +239,94 @@ export default function Dashboard() {
               </div>
 
               <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800">
-                <Button 
-                  type="button" 
-                  variant="ghost" 
+                <Button
+                  type="button"
+                  variant="ghost"
                   className="w-full flex justify-between items-center"
                   onClick={() => setShowOptionalFields(!showOptionalFields)}
                 >
                   <span>Optional Fields (Ranks, Reflection)</span>
                   {showOptionalFields ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                 </Button>
-                
+
                 {showOptionalFields && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 animate-in slide-in-from-top-2">
                     <div className="space-y-2">
                       <Label>Class Rank</Label>
-                      <Input 
-                        type="number" 
+                      <Input
+                        type="number"
                         value={formData.classRank}
-                        onChange={e => setFormData({...formData, classRank: e.target.value})}
+                        onChange={e => setFormData({ ...formData, classRank: e.target.value })}
                       />
                     </div>
                     <div className="space-y-2">
                       <Label>Grade Rank</Label>
-                      <Input 
-                        type="number" 
+                      <Input
+                        type="number"
                         value={formData.gradeRank}
-                        onChange={e => setFormData({...formData, gradeRank: e.target.value})}
+                        onChange={e => setFormData({ ...formData, gradeRank: e.target.value })}
                       />
                     </div>
                     <div className="space-y-2 md:col-span-2">
                       <Label>Reflection</Label>
-                      <textarea 
+                      <textarea
                         className="flex min-h-[80px] w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:border-zinc-800 dark:bg-zinc-950 dark:focus-visible:ring-zinc-300"
                         value={formData.reflection}
-                        onChange={e => setFormData({...formData, reflection: e.target.value})}
+                        onChange={e => setFormData({ ...formData, reflection: e.target.value })}
                         placeholder="What went well? What needs improvement?"
                       />
                     </div>
                     <div className="space-y-2 md:col-span-2">
                       <div className="flex items-center justify-between">
                         <Label>Peer Scores</Label>
-                        <Button 
-                          type="button" 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => setFormData({...formData, peerScores: [...formData.peerScores, { name: '', score: '', rank: '' }]})}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setFormData({ ...formData, peerScores: [...formData.peerScores, { name: '', score: '', rank: '' }] })}
                         >
                           <Plus className="h-4 w-4 mr-1" /> Add Peer
                         </Button>
                       </div>
                       {formData.peerScores.map((peer, idx) => (
                         <div key={idx} className="flex gap-2 items-center mt-2">
-                          <Input 
-                            placeholder="Name" 
-                            value={peer.name} 
+                          <Input
+                            placeholder="Name"
+                            value={peer.name}
                             onChange={e => {
                               const newPeers = [...formData.peerScores];
                               newPeers[idx].name = e.target.value;
-                              setFormData({...formData, peerScores: newPeers});
-                            }} 
+                              setFormData({ ...formData, peerScores: newPeers });
+                            }}
                           />
-                          <Input 
-                            placeholder="Score" 
+                          <Input
+                            placeholder="Score"
                             type="number" step="0.1"
-                            value={peer.score} 
+                            value={peer.score}
                             onChange={e => {
                               const newPeers = [...formData.peerScores];
                               newPeers[idx].score = e.target.value;
-                              setFormData({...formData, peerScores: newPeers});
-                            }} 
+                              setFormData({ ...formData, peerScores: newPeers });
+                            }}
                           />
-                          <Input 
-                            placeholder="Rank" 
+                          <Input
+                            placeholder="Rank"
                             type="number"
-                            value={peer.rank} 
+                            value={peer.rank}
                             onChange={e => {
                               const newPeers = [...formData.peerScores];
                               newPeers[idx].rank = e.target.value;
-                              setFormData({...formData, peerScores: newPeers});
-                            }} 
+                              setFormData({ ...formData, peerScores: newPeers });
+                            }}
                           />
-                          <Button 
-                            type="button" 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
                             className="text-red-500"
                             onClick={() => {
                               const newPeers = formData.peerScores.filter((_, i) => i !== idx);
-                              setFormData({...formData, peerScores: newPeers});
+                              setFormData({ ...formData, peerScores: newPeers });
                             }}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -359,26 +357,26 @@ export default function Dashboard() {
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-zinc-200 dark:stroke-zinc-800" />
-                      <XAxis 
-                        dataKey="dateFormatted" 
-                        type="category" 
+                      <XAxis
+                        dataKey="dateFormatted"
+                        type="category"
                         allowDuplicatedCategory={false}
                         className="text-xs text-zinc-500"
                       />
                       <YAxis className="text-xs text-zinc-500" domain={['auto', 'auto']} />
-                      <Tooltip 
+                      <Tooltip
                         contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                         labelStyle={{ fontWeight: 'bold', color: '#18181b' }}
                       />
                       <Legend />
                       {groupedBySubject.map((group, i) => (
-                        <Line 
+                        <Line
                           key={group.subject}
                           data={group.data}
-                          type="monotone" 
-                          dataKey="displayScore" 
-                          name={group.subject} 
-                          stroke={colors[i % colors.length]} 
+                          type="monotone"
+                          dataKey="displayScore"
+                          name={group.subject}
+                          stroke={colors[i % colors.length]}
                           strokeWidth={2}
                           activeDot={{ r: 6 }}
                         />
@@ -404,7 +402,7 @@ export default function Dashboard() {
                   <div key={record.id} className="flex items-center justify-between p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
                     <div>
                       <div className="font-semibold flex items-center gap-2">
-                        {record.subjectName} 
+                        {record.subjectName}
                         <span className="text-xs px-2 py-0.5 rounded-full bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
                           {record.categoryName}
                         </span>
@@ -441,11 +439,11 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleAddSubject} className="flex gap-2">
-                <Input 
-                  value={newSubjectName} 
-                  onChange={e => setNewSubjectName(e.target.value)} 
-                  placeholder="Subject Name" 
-                  required 
+                <Input
+                  value={newSubjectName}
+                  onChange={e => setNewSubjectName(e.target.value)}
+                  placeholder="Subject Name"
+                  required
                 />
                 <Button type="submit" size="icon"><Plus className="h-4 w-4" /></Button>
               </form>
@@ -465,7 +463,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleAddCategory} className="space-y-2">
-                <select 
+                <select
                   className="flex h-10 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:border-zinc-800 dark:bg-zinc-950 dark:focus-visible:ring-zinc-300"
                   value={newCategorySubjectId}
                   onChange={e => setNewCategorySubjectId(e.target.value)}
@@ -475,11 +473,11 @@ export default function Dashboard() {
                   {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
                 <div className="flex gap-2">
-                  <Input 
-                    value={newCategoryName} 
-                    onChange={e => setNewCategoryName(e.target.value)} 
-                    placeholder="Category Name (e.g. Midterm)" 
-                    required 
+                  <Input
+                    value={newCategoryName}
+                    onChange={e => setNewCategoryName(e.target.value)}
+                    placeholder="Category Name (e.g. Midterm)"
+                    required
                   />
                   <Button type="submit" size="icon"><Plus className="h-4 w-4" /></Button>
                 </div>

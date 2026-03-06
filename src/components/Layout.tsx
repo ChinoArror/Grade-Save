@@ -4,7 +4,7 @@ import { LogOut, Moon, Sun, BookOpen } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
-export default function Layout({ onLogout }: { onLogout: () => void }) {
+export default function Layout() {
   const navigate = useNavigate();
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -22,10 +22,19 @@ export default function Layout({ onLogout }: { onLogout: () => void }) {
   }, [isDark]);
 
   const handleLogout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    onLogout();
-    navigate('/login');
+    // 1. Clear local session from storage
+    localStorage.removeItem('auth');
+    localStorage.removeItem('sso_token');
+    localStorage.removeItem('user_uuid');
+    localStorage.removeItem('user_name');
+
+    // 2. Clear SSO center cookie via redirect
+    const SSO_URL = 'https://accounts.aryuki.com';
+    const afterLogoutUrl = encodeURIComponent(window.location.origin + '/login');
+    window.location.href = `${SSO_URL}/logout?redirect=${afterLogoutUrl}`;
   };
+
+  const userName = localStorage.getItem('user_name');
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 flex flex-col transition-colors duration-300">
@@ -35,17 +44,20 @@ export default function Layout({ onLogout }: { onLogout: () => void }) {
             <BookOpen className="h-5 w-5" />
             <span>Exam Tracker</span>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => setIsDark(!isDark)}>
-              {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </Button>
-            <Button variant="ghost" size="icon" onClick={handleLogout}>
-              <LogOut className="h-5 w-5" />
-            </Button>
+          <div className="flex items-center gap-4">
+            {userName && <span className="text-sm font-medium text-zinc-500 hidden sm:inline-block">Welcome, {userName}</span>}
+            <div className="flex gap-2">
+              <Button variant="ghost" size="icon" onClick={() => setIsDark(!isDark)} className="hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors">
+                {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              </Button>
+              <Button variant="ghost" size="icon" onClick={handleLogout} className="hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-950 dark:hover:text-red-400 transition-colors">
+                <LogOut className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
         </div>
       </header>
-      <motion.main 
+      <motion.main
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}

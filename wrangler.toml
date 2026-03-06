@@ -1,0 +1,21 @@
+name = "grade-save"
+main = "worker.ts"
+compatibility_date = "2024-03-20"
+
+routes = [
+  { pattern = "grade.aryuki.com", custom_domain = true }
+]
+
+[assets]
+directory = "dist"
+not_found_handling = "single-page-application"
+binding = "ASSETS"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "grade-save-db"
+database_id = "4d46fa87-e1da-412a-9449-146b5cb9a02f"
+
+[vars]
+SSO_SECRET = "e05c0253-fb72-448e-9d90-84b037e3b214"
+APP_ID = "grade-save"

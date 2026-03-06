@@ -3,15 +3,20 @@ import { useEffect, useState } from 'react';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Layout from './components/Layout';
+import SSOCallback from './pages/SSOCallback';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
-    fetch('/api/auth/check')
-      .then((res) => res.json())
-      .then((data) => setIsAuthenticated(data.authenticated))
-      .catch(() => setIsAuthenticated(false));
+    const auth = localStorage.getItem('auth') === 'true';
+    const token = localStorage.getItem('sso_token');
+
+    if (auth && token) {
+      setIsAuthenticated(true);
+    } else {
+      setIsAuthenticated(false);
+    }
   }, []);
 
   if (isAuthenticated === null) {
@@ -21,13 +26,14 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route 
-          path="/login" 
-          element={!isAuthenticated ? <Login onLogin={() => setIsAuthenticated(true)} /> : <Navigate to="/" />} 
+        <Route path="/sso-callback" element={<SSOCallback />} />
+        <Route
+          path="/login"
+          element={!isAuthenticated ? <Login /> : <Navigate to="/" />}
         />
-        <Route 
-          path="/" 
-          element={isAuthenticated ? <Layout onLogout={() => setIsAuthenticated(false)} /> : <Navigate to="/login" />}
+        <Route
+          path="/"
+          element={isAuthenticated ? <Layout /> : <Navigate to="/login" />}
         >
           <Route index element={<Dashboard />} />
         </Route>
